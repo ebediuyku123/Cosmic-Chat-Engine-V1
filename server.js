@@ -11,13 +11,14 @@ const io = new Server(server);
 // Dosyalar ana dizinde olduğu için direkt bulunduğun klasörü (".") statik olarak belirle
 app.use(express.static(path.join(__dirname, ".")));
 
-// Socket.io ve API route'larından sonra, herhangi bir istek geldiğinde direkt ana dizindeki index.html'i gönder
-app.get("(.*)", (req, res) => {
-    // Socket.io isteklerini engelleme
-    if (req.path.startsWith("/socket.io")) {
-        return;
-    }
+// Ana sayfa route'u
+app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
+});
+
+// Eğer kullanıcı yanlış bir sayfaya girerse (404), yine ana sayfaya yönlendir:
+app.use((req, res) => {
+    res.redirect("/");
 });
 
 // Port ayarı (Render.com için)
