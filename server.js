@@ -8,8 +8,20 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static("public"));
+// Dosyalar ana dizinde olduğu için direkt bulunduğun klasörü (".") statik olarak belirle
+app.use(express.static(path.join(__dirname, ".")));
 
+// Socket.io ve API route'larından sonra, herhangi bir istek geldiğinde direkt ana dizindeki index.html'i gönder
+app.get("*", (req, res) => {
+    // Socket.io isteklerini engelleme
+    if (req.path.startsWith("/socket.io")) {
+        return;
+    }
+    res.sendFile(path.join(__dirname, "index.html"));
+});
+
+// Port ayarı (Render.com için)
+const PORT = process.env.PORT || 3000;
 const DB_PATH = path.join(__dirname, "database.json");
 
 /* =========================
@@ -43,7 +55,7 @@ if (fs.existsSync(DB_PATH)) {
                 if (!SERVERS[sName].bannedUsers) SERVERS[sName].bannedUsers = [];
             });
         }
-        console.log(">> Cosmic Database v3.2 Loaded Successfully.");
+        console.log(">> Cosmic Database v3.3 Loaded Successfully.");
     } catch (err) {
         console.error(">> DB Load Error:", err);
     }
@@ -112,6 +124,11 @@ io.on("connection", socket => {
                         joinDate: new Date().toISOString(),
                         isAdmin: true
                     };
+                    saveDB();
+                } else {
+                    // Mevcut admin hesabını güncelle
+                    USERS["+"].isAdmin = true;
+                    USERS["+"].isPlus = true;
                     saveDB();
                 }
             } else if (USERS[username].password !== password) {
@@ -347,6 +364,31 @@ io.on("connection", socket => {
             // Ban kontrolü
             if (srv.bannedUsers && srv.bannedUsers.includes(socket.data.username)) {
                 return socket.emit("error", "Bu sunucudan yasaklandınız!");
+            }
+
+            // Admin Komut Kontrolü (!plusver [isim])
+            if (text.startsWith("!plusver ") && socket.data.isAdmin) {
+                const targetUsername = text.split(" ")[1];
+                if (targetUsername && USERS[targetUsername]) {
+                    USERS[targetUsername].isPlus = true;
+                    saveDB();
+                    const botMsg = {
+                        user: "CosmicBot",
+                        text: `⭐ Admin ${socket.data.username}, ${targetUsername} kullanıcısına Engine Plus verdi!`,
+                        roleColor: "#ffd700",
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        pulse: false,
+                        isPlus: false,
+                        avatar: null,
+                        imageUrl: null,
+                        isBot: true
+                    };
+                    srv.channels[socket.data.currentChannel].push(botMsg);
+                    saveDB();
+                    io.to(socket.data.currentServer).emit("message", { ...botMsg, channel: socket.data.currentChannel });
+                    io.emit("plusGranted", { username: targetUsername });
+                }
+                return;
             }
 
             // Cosmic-Bot Komut Kontrolü
@@ -690,9 +732,10 @@ io.on("connection", socket => {
     });
 });
 
-server.listen(3000, () => {
+server.listen(PORT, () => {
     console.log(">> Cosmic Engine v3.3 - Evolution & Admin Edition");
     console.log(">> Admin Account: + / 2013");
+    console.log(">> Admin Command: !plusver [username]");
     console.log(">> Cosmic-Bot Active: !zar, !para, !günlük, !profil");
-    console.log(">> Server Live on Port 3000");
+    console.log(`>> Server Live on Port ${PORT}`);
 });
