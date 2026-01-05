@@ -1,0 +1,21 @@
+{
+  "name": "cosmic-chat-engine",
+  "version": "3.3.0",
+  "description": "Modern, gerçek zamanlı chat uygulaması - Engine Plus Edition",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["chat", "socket.io", "real-time", "messaging"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

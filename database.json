@@ -1,0 +1,221 @@
+{
+  "USERS": {
+    "ahmet": {
+      "password": "ahmet",
+      "servers": [
+        "Global",
+        "deneme",
+        "sa"
+      ],
+      "pulse": true,
+      "avatar": null
+    },
+    "a": {
+      "password": "a",
+      "servers": [
+        "Global"
+      ],
+      "friends": [],
+      "requests": [
+        "bot1"
+      ]
+    },
+    "bot1": {
+      "password": "bot1",
+      "servers": [
+        "Global"
+      ],
+      "friends": [],
+      "requests": []
+    },
+    "+": {
+      "password": "+",
+      "servers": [
+        "Global"
+      ],
+      "friends": [],
+      "requests": [],
+      "pulse": true,
+      "isPlus": false,
+      "avatar": null,
+      "banner": null,
+      "bio": "Deneme.",
+      "themeColor": "#6f55f2",
+      "credits": 0,
+      "joinDate": "2026-01-05T19:24:21.699Z"
+    },
+    "ahm": {
+      "password": "ahm",
+      "servers": [
+        "Global"
+      ],
+      "friends": [],
+      "requests": []
+    }
+  },
+  "SERVERS": {
+    "Global": {
+      "owner": "system",
+      "channels": {
+        "genel": [
+          {
+            "user": "+",
+            "text": "u",
+            "roleColor": "#ddd",
+            "time": "21:33"
+          },
+          {
+            "user": "ahmet",
+            "text": "aaa",
+            "roleColor": "#ddd",
+            "time": "22:18",
+            "pulse": true,
+            "avatar": null,
+            "imageUrl": null
+          },
+          {
+            "user": "ahmet",
+            "text": "bbeee",
+            "roleColor": "#ddd",
+            "time": "22:18",
+            "pulse": true,
+            "avatar": null,
+            "imageUrl": null
+          },
+          {
+            "user": "ahmet",
+            "text": "ceee",
+            "roleColor": "#ddd",
+            "time": "22:18",
+            "pulse": true,
+            "avatar": null,
+            "imageUrl": null
+          },
+          {
+            "user": "+",
+            "text": "as",
+            "roleColor": "#6f55f2",
+            "time": "22:25",
+            "pulse": true,
+            "isPlus": false,
+            "avatar": null,
+            "imageUrl": null
+          },
+          {
+            "user": "+",
+            "text": "sa",
+            "roleColor": "#6f55f2",
+            "time": "22:25",
+            "pulse": true,
+            "isPlus": false,
+            "avatar": null,
+            "imageUrl": null
+          },
+          {
+            "user": "+",
+            "text": "sa",
+            "roleColor": "#6f55f2",
+            "time": "22:25",
+            "pulse": true,
+            "isPlus": false,
+            "avatar": null,
+            "imageUrl": null
+          },
+          {
+            "user": "+",
+            "text": "sa",
+            "roleColor": "#6f55f2",
+            "time": "22:25",
+            "pulse": true,
+            "isPlus": false,
+            "avatar": null,
+            "imageUrl": null
+          },
+          {
+            "user": "+",
+            "text": "as",
+            "roleColor": "#6f55f2",
+            "time": "22:25",
+            "pulse": true,
+            "isPlus": false,
+            "avatar": null,
+            "imageUrl": null
+          },
+          {
+            "user": "+",
+            "text": "as",
+            "roleColor": "#6f55f2",
+            "time": "22:25",
+            "pulse": true,
+            "isPlus": false,
+            "avatar": null,
+            "imageUrl": null
+          },
+          {
+            "user": "+",
+            "text": "as",
+            "roleColor": "#6f55f2",
+            "time": "22:25",
+            "pulse": true,
+            "isPlus": false,
+            "avatar": null,
+            "imageUrl": null
+          },
+          {
+            "user": "+",
+            "text": "as",
+            "roleColor": "#6f55f2",
+            "time": "22:25",
+            "pulse": true,
+            "isPlus": false,
+            "avatar": null,
+            "imageUrl": null
+          },
+          {
+            "user": "+",
+            "text": "as",
+            "roleColor": "#6f55f2",
+            "time": "22:25",
+            "pulse": true,
+            "isPlus": false,
+            "avatar": null,
+            "imageUrl": null
+          }
+        ],
+        "yardım": []
+      },
+      "roles": {
+        "Mod": "#00ff00"
+      },
+      "userRoles": {},
+      "rolePermissions": {},
+      "bannedUsers": []
+    },
+    "deneme": {
+      "owner": "ahmet",
+      "channels": {
+        "genel": []
+      },
+      "roles": {
+        "+": "#000000"
+      },
+      "userRoles": {},
+      "rolePermissions": {},
+      "bannedUsers": []
+    },
+    "sa": {
+      "owner": "ahmet",
+      "channels": {
+        "genel": []
+      },
+      "roles": {
+        "Admin": "#ff4757"
+      },
+      "userRoles": {
+        "ahmet": "Admin"
+      },
+      "rolePermissions": {},
+      "bannedUsers": []
+    }
+  }
+}
