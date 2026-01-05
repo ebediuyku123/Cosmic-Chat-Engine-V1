@@ -12,7 +12,7 @@ const io = new Server(server);
 app.use(express.static(path.join(__dirname, ".")));
 
 // Socket.io ve API route'larından sonra, herhangi bir istek geldiğinde direkt ana dizindeki index.html'i gönder
-app.get("*", (req, res) => {
+app.get("(.*)", (req, res) => {
     // Socket.io isteklerini engelleme
     if (req.path.startsWith("/socket.io")) {
         return;
