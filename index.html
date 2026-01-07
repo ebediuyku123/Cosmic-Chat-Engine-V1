@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
 
     <div id="auth-screen" class="view-layer">
@@ -15,17 +17,17 @@
             <div class="logo-area ripple">🚀</div>
             <h1>COSMIC CHAT</h1>
             <p class="subtitle">Evrenin en hızlı mesajlaşma ağına hoş geldin.</p>
-            
+
             <div class="input-group">
                 <i class="fa-solid fa-user"></i>
                 <input id="usernameInput" placeholder="Kullanıcı adı" autocomplete="off">
             </div>
-            
+
             <div class="input-group">
                 <i class="fa-solid fa-lock"></i>
                 <input id="passwordInput" type="password" placeholder="Şifre">
             </div>
-            
+
             <button id="loginBtn" class="btn-glow">Giriş Yap / Kayıt Ol</button>
             <p id="error" class="error-msg"></p>
         </div>
@@ -33,102 +35,192 @@
 
     <div id="app-screen" class="view-layer hidden">
         <div id="app">
-            
+
             <nav id="serversBar">
+                <!-- Discord-like Home Button / Social -->
+                <div class="serverIcon" id="homeBtn" title="Ana Sayfa">
+                    <i class="fa-brands fa-discord"></i>
+                </div>
+                <div class="serverIconSep"></div>
+
                 <div id="serverListContainer">
-                    </div>
+                </div>
                 <div class="serverIcon addServerBtn" id="addServerBtn" title="Sunucu Ekle">
                     <i class="fa-solid fa-plus"></i>
                 </div>
             </nav>
 
-            <aside id="channelsBar">
-                <div class="serverHeader">
+            <div id="sidebar">
+                <header class="serverHeader">
                     <span id="currentServerName">Yükleniyor...</span>
-                    <i class="fa-solid fa-gear settings-icon" id="serverSettingsBtn" title="Sunucu Ayarları"></i>
-                </div>
+                    <i class="fa-solid fa-chevron-down" id="serverSettingsBtn" title="Sunucu Seçenekleri"></i>
+                </header>
 
                 <div id="channelList">
                     <div class="channel-group-header">
+                        <i class="fa-solid fa-angle-down"></i>
                         <span>METİN KANALLARI</span>
                         <i class="fa-solid fa-plus addChannelBtn" id="addChannelBtn" title="Kanal Oluştur"></i>
                     </div>
                     <div id="channelsContainer">
+                    </div>
+
+                    <!-- Voice Channels Section -->
+                    <div class="voice-channel-group">
+                        <div class="channel-group-header">
+                            <i class="fa-solid fa-angle-down"></i>
+                            <span>SES KANALLARI</span>
                         </div>
+                        <div id="voiceChannelsContainer">
+                            <div class="voice-channel" data-channel="Genel Sohbet" onclick="joinVoiceChannel(this)">
+                                <i class="fa-solid fa-volume-high"></i>
+                                <span>Genel Sohbet</span>
+                            </div>
+                            <div class="voice-channel" data-channel="Oyun Odası" onclick="joinVoiceChannel(this)">
+                                <i class="fa-solid fa-volume-high"></i>
+                                <span>Oyun Odası</span>
+                            </div>
+                            <div class="voice-channel" data-channel="Müzik" onclick="joinVoiceChannel(this)">
+                                <i class="fa-solid fa-volume-high"></i>
+                                <span>Müzik</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div id="socialBtn" class="glass-btn" onclick="openModal('modalSocial')">
-                    <div class="social-info">
-                        <i class="fa-solid fa-user-group"></i>
-                        <span>Sosyal Panel</span>
-                    </div>
-                    <span id="requestBadge" class="badge hidden">0</span>
+                <!-- Voice Status (Hidden by default) -->
+                <div id="voiceStatus" class="voice-status" style="display: none;">
+                    <i class="fa-solid fa-signal"></i>
+                    <span id="voiceChannelName">Bağlı değil</span>
+                    <i class="fa-solid fa-phone-slash voice-disconnect" onclick="disconnectVoice()"
+                        title="Bağlantıyı Kes"></i>
                 </div>
-                
-                <div id="pulseBtn" class="glass-btn" onclick="openModal('modalPulse')" style="margin-top: 10px;">
-                    <div class="social-info">
-                        <i class="fa-solid fa-star"></i>
-                        <span>Cosmic Pulse</span>
+
+                <!-- User Area (Discord Style) -->
+                <div id="userArea">
+                    <div class="user-info-container">
+                        <div id="currentUserAvatar" class="user-avatar-small"></div>
+                        <div class="name-tag">
+                            <span id="currentUserNameDisplay">Kullanıcı</span>
+                            <span id="currentUserTag">#0000</span>
+                        </div>
                     </div>
-                    <span id="pulseIndicator" class="pulse-badge hidden">ACTIVE</span>
-                </div>
-                
-                <div class="glass-btn" onclick="openModal('modalProfile')" style="margin-top: 10px;">
-                    <div class="social-info">
-                        <i class="fa-solid fa-user-gear"></i>
-                        <span>Profil Ayarları</span>
+                    <div class="user-controls">
+                        <div class="control-btn"><i class="fa-solid fa-microphone"></i></div>
+                        <div class="control-btn"><i class="fa-solid fa-headphones"></i></div>
+                        <div class="control-btn" onclick="openModal('modalProfile')"><i class="fa-solid fa-gear"></i>
+                        </div>
                     </div>
                 </div>
-            </aside>
+            </div>
 
             <main id="chatArea">
                 <header id="chatHeader">
                     <div class="header-info">
-                        <i class="fa-solid fa-hashtag"></i>
+                        <div class="header-icon"><i class="fa-solid fa-hashtag"></i></div>
                         <span id="headerTitle">genel</span>
                     </div>
-                </header>
-                
-                <div id="messages">
+                    <div class="header-toolbar">
+                        <div class="toolbar-icon" onclick="openModal('modalPulse')" title="Cosmic Pulse"><i
+                                class="fa-solid fa-star"></i></div>
+                        <div class="toolbar-icon" onclick="toggleMemberList()" title="Üyeleri Göster"><i
+                                class="fa-solid fa-user-group"></i></div>
+                        <div class="search-box">
+                            <input placeholder="Ara">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
                     </div>
+                </header>
+
+                <div id="messages">
+                </div>
 
                 <div id="chatInputArea">
                     <div class="input-wrapper">
                         <button class="attach-btn"><i class="fa-solid fa-circle-plus"></i></button>
                         <input id="msgInput" placeholder="Mesajını buraya yaz..." autocomplete="off">
-                        <button class="emoji-btn"><i class="fa-solid fa-face-smile"></i></button>
+                        <div class="input-right-tools">
+                            <button class="gift-btn"><i class="fa-solid fa-gift"></i></button>
+                            <button class="emoji-btn"><i class="fa-solid fa-face-smile"></i></button>
+                        </div>
                     </div>
                 </div>
             </main>
 
             <aside id="membersBar">
                 <div class="member-group-header">
-                    <span>ÜYELER</span>
-                    <span id="memberCount" class="count-tag">0</span>
+                    <span>ÇEVRİMİÇİ — <span id="memberCount">0</span></span>
                 </div>
                 <div id="memberListContainer">
-                    </div>
+                </div>
             </aside>
+
+            <!-- DM PANEL (Shown when Home is clicked) -->
+            <div id="dmPanel" class="hidden">
+                <div class="dm-sidebar">
+                    <div class="dm-search">
+                        <input id="dmSearchInput" placeholder="Sohbet bul veya başlat">
+                    </div>
+                    <div class="dm-section-header">
+                        <span>DİREKT MESAJLAR</span>
+                    </div>
+                    <div id="dmFriendsList" class="dm-list">
+                        <!-- Friends will be injected here -->
+                    </div>
+                </div>
+                <div class="dm-chat-container" id="dmChatContainer">
+                    <div class="dm-welcome" id="dmWelcome">
+                        <div class="dm-welcome-icon">💬</div>
+                        <h2>Arkadaşlarınla Sohbet Et</h2>
+                        <p>Sol taraftan bir arkadaş seç veya yeni arkadaş ekle!</p>
+                        <button class="btn-primary" onclick="openModal('modalSocial')">
+                            <i class="fa-solid fa-user-plus"></i> Arkadaş Ekle
+                        </button>
+                    </div>
+                    <div id="dmChatArea" class="hidden">
+                        <header class="dm-chat-header">
+                            <i class="fa-solid fa-at"></i>
+                            <span id="dmChatUsername">Kullanıcı</span>
+                        </header>
+                        <div id="dmMessages" class="dm-messages">
+                            <!-- DM messages here -->
+                        </div>
+                        <div class="dm-input-area">
+                            <div class="input-wrapper">
+                                <button class="attach-btn"><i class="fa-solid fa-circle-plus"></i></button>
+                                <input id="dmInput" placeholder="Mesaj gönder..." autocomplete="off">
+                                <div class="input-right-tools">
+                                    <button class="emoji-btn"><i class="fa-solid fa-face-smile"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         </div>
     </div>
 
     <div id="modalOverlay" class="hidden">
-        
+
         <div id="modalServer" class="modal-box hidden">
             <div class="modal-header">
                 <h2>Sunucu Keşfet</h2>
-                <i class="fa-solid fa-xmark close-icon" onclick="closeAllModals()"></i>
+                <div class="close-icon" onclick="closeAllModals()"><i class="fa-solid fa-xmark"></i></div>
             </div>
             <div class="modal-body">
-                <label>Yeni Bir Evren Kur</label>
-                <input id="newServerName" placeholder="Sunucu ismini belirle">
+                <div class="input-block">
+                    <label>YENİ BİR EVREN KUR</label>
+                    <input id="newServerName" placeholder="Sunucu ismini belirle">
+                </div>
                 <button id="btnCreateServer" class="btn-primary">Sunucu Oluştur</button>
-                
+
                 <div class="divider"><span>VEYA</span></div>
-                
-                <label>Var Olan Bir Evrene Katıl</label>
-                <input id="joinServerName" placeholder="Sunucu adını tam yaz">
+
+                <div class="input-block">
+                    <label>BİR EVRENE KATIL</label>
+                    <input id="joinServerName" placeholder="Sunucu adını tam yaz">
+                </div>
                 <button id="btnJoinServer" class="btn-primary btn-secondary">Sunucuya Katıl</button>
             </div>
         </div>
@@ -136,10 +228,16 @@
         <div id="modalChannel" class="modal-box hidden">
             <div class="modal-header">
                 <h2>Kanal Oluştur</h2>
-                <i class="fa-solid fa-xmark close-icon" onclick="closeAllModals()"></i>
+                <div class="close-icon" onclick="closeAllModals()"><i class="fa-solid fa-xmark"></i></div>
             </div>
             <div class="modal-body">
-                <input id="newChannelName" placeholder="Kanal adı (örn: oyun-odası)">
+                <div class="input-block">
+                    <label>KANAL ADI</label>
+                    <div class="hash-input">
+                        <i class="fa-solid fa-hashtag"></i>
+                        <input id="newChannelName" placeholder="yeni-kanal">
+                    </div>
+                </div>
                 <button id="btnCreateChannel" class="btn-primary">Kanalı Aç</button>
             </div>
         </div>
@@ -147,73 +245,162 @@
         <div id="modalRole" class="modal-box hidden">
             <div class="modal-header">
                 <h2>Rol & Yetki Sistemi</h2>
-                <i class="fa-solid fa-xmark close-icon" onclick="closeAllModals()"></i>
+                <div class="close-icon" onclick="closeAllModals()"><i class="fa-solid fa-xmark"></i></div>
             </div>
             <div class="modal-body">
-                <input id="newRoleName" placeholder="Rol ismi (örn: Vip)">
+                <div class="input-block">
+                    <label>ROL İSMİ</label>
+                    <input id="newRoleName" placeholder="Örn: Vip">
+                </div>
                 <div class="color-picker-wrapper">
-                    <label>Rol Rengi:</label>
+                    <label>ROL RENGİ</label>
                     <input id="newRoleColor" type="color" value="#6f55f2">
                 </div>
-                <div style="margin: 15px 0;">
-                    <label style="display: block; margin-bottom: 10px; font-size: 12px; color: var(--text-muted);">İZİNLER:</label>
-                    <label style="display: flex; align-items: center; margin-bottom: 8px; cursor: pointer;">
-                        <input type="checkbox" id="permManageChannels" style="margin-right: 8px;">
+                <div class="permissions-list">
+                    <label class="perm-title">GENEL YETKİLER</label>
+                    <label class="perm-item">
                         <span>Kanal Yönetimi (Silme/Ekleme)</span>
+                        <input type="checkbox" id="permManageChannels">
                     </label>
-                    <label style="display: flex; align-items: center; margin-bottom: 8px; cursor: pointer;">
-                        <input type="checkbox" id="permManageMembers" style="margin-right: 8px;">
+                    <label class="perm-item">
                         <span>Üye Yönetimi (Rol Atama)</span>
+                        <input type="checkbox" id="permManageMembers">
                     </label>
-                    <label style="display: flex; align-items: center; margin-bottom: 8px; cursor: pointer;">
-                        <input type="checkbox" id="permBanUsers" style="margin-right: 8px;">
+                    <label class="perm-item">
                         <span>Kullanıcı Yasaklama</span>
+                        <input type="checkbox" id="permBanUsers">
                     </label>
-                    <label style="display: flex; align-items: center; margin-bottom: 8px; cursor: pointer;">
-                        <input type="checkbox" id="permChangeColors" style="margin-right: 8px;">
+                    <label class="perm-item">
                         <span>Renk Değiştirme</span>
+                        <input type="checkbox" id="permChangeColors">
                     </label>
                 </div>
                 <button id="btnCreateRole" class="btn-primary">Rolü Kaydet</button>
             </div>
         </div>
-        
-        <div id="modalPulse" class="modal-box hidden">
+
+        <!-- ENGINE PLUS MODAL (Nitro-like) -->
+        <div id="modalPulse" class="modal-box hidden" style="width: 680px;">
             <div class="modal-header">
-                <h2>✨ Cosmic Pulse</h2>
-                <i class="fa-solid fa-xmark close-icon" onclick="closeAllModals()"></i>
+                <h2>⭐ Engine Plus</h2>
+                <div class="close-icon" onclick="closeAllModals()"><i class="fa-solid fa-xmark"></i></div>
             </div>
-            <div class="modal-body">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <div style="font-size: 48px; margin-bottom: 10px;">⭐</div>
-                    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">
-                        Cosmic Pulse ile özel özelliklere erişin!<br>
-                        Parlayan isimler, GIF avatar desteği ve daha fazlası...
-                    </p>
+            <div class="modal-body" style="padding: 0;">
+                <!-- Hero Section -->
+                <div class="plus-hero">
+                    <div class="plus-hero-icon">⭐</div>
+                    <h2>Engine Plus ile Öne Çık!</h2>
+                    <p>GIF avatarları, özel profil bannerları ve daha fazlası</p>
+                    <div id="pulseStatus" class="status-indicator" style="margin-top: 15px;">
+                        <p id="pulseStatusText">Durum: Aktif Değil</p>
+                    </div>
+                    <button onclick="activatePulse(); closeAllModals();" class="btn-primary btn-gold"
+                        style="margin-top: 15px;">
+                        ⭐ Engine Plus'ı Aktif Et (Demo)
+                    </button>
                 </div>
-                <div id="pulseStatus" style="padding: 15px; background: rgba(255,215,0,0.1); border-radius: 8px; margin-bottom: 15px; text-align: center;">
-                    <p id="pulseStatusText" style="margin: 0;">Durum: Aktif Değil</p>
+
+                <!-- GIF Avatar Gallery -->
+                <div class="plus-section">
+                    <h3>🎭 Hazır GIF Avatarlar</h3>
+                    <p class="plus-desc">Engine Plus ile bu avatarları kullanabilirsin!</p>
+                    <div class="avatar-gallery" id="avatarGallery">
+                        <div class="avatar-item"
+                            onclick="selectPlusAvatar('https://media.giphy.com/media/l4FGuhL4U2WyjdkaY/giphy.gif')">
+                            <img src="https://media.giphy.com/media/l4FGuhL4U2WyjdkaY/giphy.gif" alt="Avatar 1">
+                        </div>
+                        <div class="avatar-item"
+                            onclick="selectPlusAvatar('https://media.giphy.com/media/3o7TKnO6Wve6502iJ2/giphy.gif')">
+                            <img src="https://media.giphy.com/media/3o7TKnO6Wve6502iJ2/giphy.gif" alt="Avatar 2">
+                        </div>
+                        <div class="avatar-item"
+                            onclick="selectPlusAvatar('https://media.giphy.com/media/xT9IgzoKnwFNmISR8I/giphy.gif')">
+                            <img src="https://media.giphy.com/media/xT9IgzoKnwFNmISR8I/giphy.gif" alt="Avatar 3">
+                        </div>
+                        <div class="avatar-item"
+                            onclick="selectPlusAvatar('https://media.giphy.com/media/26tn33aiTi1jkl6H6/giphy.gif')">
+                            <img src="https://media.giphy.com/media/26tn33aiTi1jkl6H6/giphy.gif" alt="Avatar 4">
+                        </div>
+                        <div class="avatar-item"
+                            onclick="selectPlusAvatar('https://media.giphy.com/media/VbnUQpnihPSIgIXuZv/giphy.gif')">
+                            <img src="https://media.giphy.com/media/VbnUQpnihPSIgIXuZv/giphy.gif" alt="Avatar 5">
+                        </div>
+                        <div class="avatar-item"
+                            onclick="selectPlusAvatar('https://media.giphy.com/media/3o6ZtaO9BZHcOjmErm/giphy.gif')">
+                            <img src="https://media.giphy.com/media/3o6ZtaO9BZHcOjmErm/giphy.gif" alt="Avatar 6">
+                        </div>
+                    </div>
                 </div>
-                <button onclick="activatePulse(); closeAllModals();" class="btn-primary" style="margin-bottom: 10px;">
-                    Pulse'u Aktif Et (Demo)
-                </button>
-                <button onclick="updateAvatar();" class="btn-primary btn-secondary" style="opacity: 0.7;">
-                    Avatar Güncelle (GIF)
-                </button>
+
+                <!-- Banner Gallery -->
+                <div class="plus-section">
+                    <h3>🎨 Profil Bannerları</h3>
+                    <p class="plus-desc">Profilini bu bannerlarla süsle!</p>
+                    <div class="banner-gallery" id="bannerGallery">
+                        <div class="banner-item"
+                            onclick="selectPlusBanner('https://img.freepik.com/free-photo/abstract-luxury-gradient-blue-background-smooth-dark-blue-with-black-vignette-studio-banner_1258-54051.jpg')">
+                            <img src="https://img.freepik.com/free-photo/abstract-luxury-gradient-blue-background-smooth-dark-blue-with-black-vignette-studio-banner_1258-54051.jpg"
+                                alt="Banner 1">
+                        </div>
+                        <div class="banner-item"
+                            onclick="selectPlusBanner('https://img.freepik.com/free-photo/vivid-blurred-colorful-background_58702-2655.jpg')">
+                            <img src="https://img.freepik.com/free-photo/vivid-blurred-colorful-background_58702-2655.jpg"
+                                alt="Banner 2">
+                        </div>
+                        <div class="banner-item"
+                            onclick="selectPlusBanner('https://img.freepik.com/free-photo/purple-oily-bubble-abstract-background_53876-98540.jpg')">
+                            <img src="https://img.freepik.com/free-photo/purple-oily-bubble-abstract-background_53876-98540.jpg"
+                                alt="Banner 3">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features List -->
+                <div class="plus-features">
+                    <div class="plus-feature">
+                        <i class="fa-solid fa-image"></i>
+                        <span>GIF Avatar Kullanımı</span>
+                    </div>
+                    <div class="plus-feature">
+                        <i class="fa-solid fa-panorama"></i>
+                        <span>Özel Profil Bannerı</span>
+                    </div>
+                    <div class="plus-feature">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Parlayan Kullanıcı Adı</span>
+                    </div>
+                    <div class="plus-feature">
+                        <i class="fa-solid fa-star"></i>
+                        <span>Özel Plus Rozeti</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="modalSocial" class="modal-box hidden">
+        <div id="modalSocial" class="modal-box hidden" style="width: 600px;">
             <div class="modal-header">
-                <h2>Sosyal Galaksi</h2>
-                <i class="fa-solid fa-xmark close-icon" onclick="closeAllModals()"></i>
+                <h2>Arkadaşlar</h2>
+                <div class="close-icon" onclick="closeAllModals()"><i class="fa-solid fa-xmark"></i></div>
             </div>
             <div class="modal-body">
-                <div class="search-bar">
-                    <input id="friendSearchInput" placeholder="Kullanıcı ara...">
-                    <button onclick="sendFriendRequest()" class="btn-sq"><i class="fa-solid fa-paper-plane"></i></button>
+                <!-- Friend Add Section -->
+                <div class="friend-add-section">
+                    <h3>Arkadaş Ekle</h3>
+                    <p>Kullanıcı adını girerek arkadaşlık isteği gönderebilirsin.</p>
+                    <div class="friend-add-input">
+                        <input id="friendSearchInput" placeholder="Kullanıcı adını gir...">
+                        <button onclick="sendFriendRequest()" class="btn-primary">İstek Gönder</button>
+                    </div>
                 </div>
-                <div id="socialContent">
+
+                <!-- Tabs -->
+                <div class="friend-tabs">
+                    <div class="friend-tab active" onclick="showFriendTab('all')">Tümü</div>
+                    <div class="friend-tab" onclick="showFriendTab('pending')">Bekleyen</div>
+                </div>
+
+                <!-- Friend Content -->
+                <div class="friend-content">
                     <div id="friendRequestsSection" class="social-section"></div>
                     <div id="friendsListSection" class="social-section"></div>
                 </div>
@@ -223,71 +410,77 @@
         <div id="modalAssignUserRole" class="modal-box hidden">
             <div class="modal-header">
                 <h2 id="assignTargetName">Rolü Değiştir</h2>
-                <i class="fa-solid fa-xmark close-icon" onclick="closeAllModals()"></i>
+                <div class="close-icon" onclick="closeAllModals()"><i class="fa-solid fa-xmark"></i></div>
             </div>
             <div class="modal-body">
                 <div id="roleOptionsContainer" class="role-grid">
-                    </div>
+                </div>
             </div>
         </div>
-        
+
         <div id="modalAdmin" class="modal-box hidden">
             <div class="modal-header">
-                <h2>👑 Tanrı Modu - Admin Paneli</h2>
-                <i class="fa-solid fa-xmark close-icon" onclick="closeAllModals()"></i>
+                <h2>👑 Yönetici Paneli</h2>
+                <div class="close-icon" onclick="closeAllModals()"><i class="fa-solid fa-xmark"></i></div>
             </div>
             <div class="modal-body">
-                <div style="margin-bottom: 20px;">
-                    <label>Kullanıcı Adı:</label>
-                    <input id="adminTargetUser" placeholder="Hedef kullanıcı adı">
+                <div class="input-block">
+                    <label>HEDEF KULLANICI</label>
+                    <input id="adminTargetUser" placeholder="Kullanıcı Adı">
                 </div>
                 <div class="admin-buttons">
-                    <button onclick="adminGivePlus(document.getElementById('adminTargetUser').value)" class="btn-primary" style="background: linear-gradient(135deg, #ffd700, #ffed4e);">
+                    <button onclick="adminGivePlus(document.getElementById('adminTargetUser').value)"
+                        class="btn-primary btn-gold">
                         ⭐ Engine Plus Ver
                     </button>
-                    <button onclick="adminKickUser(document.getElementById('adminTargetUser').value)" class="btn-primary" style="background: linear-gradient(135deg, #ff6b6b, #ff8787);">
+                    <button onclick="adminKickUser(document.getElementById('adminTargetUser').value)"
+                        class="btn-primary btn-danger">
                         👢 Sunucudan At
                     </button>
-                    <button onclick="adminBanUser(document.getElementById('adminTargetUser').value)" class="btn-primary" style="background: linear-gradient(135deg, #ff0000, #ff4444);">
-                        🚫 Tüm Sunuculardan Yasakla
+                    <button onclick="adminBanUser(document.getElementById('adminTargetUser').value)"
+                        class="btn-primary btn-danger">
+                        🚫 Yasakla
                     </button>
                 </div>
             </div>
         </div>
-        
+
         <div id="modalProfile" class="modal-box hidden">
             <div class="modal-header">
-                <h2>⚙️ Profil Ayarları</h2>
-                <i class="fa-solid fa-xmark close-icon" onclick="closeAllModals()"></i>
+                <h2>Kullanıcı Ayarları</h2>
+                <div class="close-icon" onclick="closeAllModals()"><i class="fa-solid fa-xmark"></i></div>
             </div>
             <div class="modal-body">
-                <div style="margin-bottom: 15px;">
-                    <label>📝 Bio:</label>
-                    <textarea id="profileBio" placeholder="Hakkınızda bir şeyler yazın..." style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; min-height: 80px; resize: vertical;"></textarea>
+                <div class="profile-preview">
+                    <!-- Profile logic handled by js -->
                 </div>
-                <div style="margin-bottom: 15px;">
-                    <label>🖼️ Avatar URL:</label>
-                    <input id="profileAvatar" type="text" placeholder="Avatar URL'si (GIF: Plus gerekli)">
-                    <small style="color: var(--text-muted); font-size: 11px;">Plus üyeleri GIF kullanabilir</small>
+                <div class="input-block">
+                    <label>HAKKIMDA</label>
+                    <textarea id="profileBio" placeholder="Hakkında bir şeyler yaz..."></textarea>
                 </div>
-                <div style="margin-bottom: 15px;">
-                    <label>🎨 Banner URL:</label>
-                    <input id="profileBanner" type="text" placeholder="Banner URL'si (Sadece Plus)">
-                    <small style="color: var(--text-muted); font-size: 11px;">Sadece Engine Plus üyeleri</small>
+                <div class="input-block">
+                    <label>AVATAR URL</label>
+                    <input id="profileAvatar" type="text" placeholder="https://...">
                 </div>
-                <div style="margin-bottom: 15px;">
-                    <label>🎨 Tema Rengi:</label>
+                <div class="input-block">
+                    <label>BANNER URL (PLUS)</label>
+                    <input id="profileBanner" type="text" placeholder="https://...">
+                </div>
+                <div class="input-block">
+                    <label>TEMA RENGİ</label>
                     <input id="profileThemeColor" type="color" value="#6f55f2">
                 </div>
-                <button onclick="updateProfile(); updateAvatarFromProfile();" class="btn-primary">💾 Kaydet</button>
+                <button onclick="updateProfile(); updateAvatarFromProfile();" class="btn-primary">Değişiklikleri
+                    Kaydet</button>
             </div>
         </div>
-        
+
     </div>
-    
+
     <div id="contextMenu" class="context-menu" style="display: none;"></div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>
 </body>
+
 </html>
