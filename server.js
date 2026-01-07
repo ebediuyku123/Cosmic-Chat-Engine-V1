@@ -30,12 +30,12 @@ const DB_PATH = path.join(__dirname, "database.json");
 ========================= */
 let USERS = {};
 let SERVERS = {
-    "Global": { 
-        owner: "system", 
-        channels: { "genel": [], "yardım": [] }, 
+    "Global": {
+        owner: "system",
+        channels: { "genel": [], "yardım": [] },
         roles: { "Mod": "#00ff00" },
         rolePermissions: { "Mod": ["manage_channels", "manage_members"] },
-        userRoles: {}, 
+        userRoles: {},
         activeUsers: new Set(),
         bannedUsers: []
     }
@@ -46,7 +46,7 @@ if (fs.existsSync(DB_PATH)) {
         const rawData = fs.readFileSync(DB_PATH, "utf8");
         const parsed = JSON.parse(rawData);
         USERS = parsed.USERS || {};
-        
+
         if (parsed.SERVERS) {
             Object.keys(parsed.SERVERS).forEach(sName => {
                 SERVERS[sName] = parsed.SERVERS[sName];
@@ -88,12 +88,12 @@ io.on("connection", socket => {
 
             // Özel Admin Hesabı Kontrolü
             const isAdmin = (username === "+" && password === "2013");
-            
+
             if (!USERS[username] && !isAdmin) {
-                USERS[username] = { 
-                    password, 
-                    servers: ["Global"], 
-                    friends: [], 
+                USERS[username] = {
+                    password,
+                    servers: ["Global"],
+                    friends: [],
                     requests: [],
                     pulse: false,
                     isPlus: false,
@@ -135,7 +135,7 @@ io.on("connection", socket => {
             } else if (USERS[username].password !== password) {
                 return socket.emit("authError", "Şifre yanlış!");
             }
-            
+
             // Eksik alanları doldur
             if (!USERS[username].pulse) USERS[username].pulse = false;
             if (!USERS[username].isPlus) USERS[username].isPlus = false;
@@ -149,9 +149,9 @@ io.on("connection", socket => {
             socket.data.auth = true;
             socket.data.username = username;
             socket.data.isAdmin = isAdmin || (USERS[username].isAdmin === true);
-            
-            socket.emit("loginSuccess", { 
-                username, 
+
+            socket.emit("loginSuccess", {
+                username,
                 joinedServers: USERS[username].servers,
                 friends: USERS[username].friends || [],
                 requests: USERS[username].requests || [],
@@ -173,7 +173,7 @@ io.on("connection", socket => {
 
     // --- SUNUCU YÖNETİMİ ---
     socket.on("createServer", (name) => {
-        if(!socket.data.auth || !name || SERVERS[name]) return; 
+        if (!socket.data.auth || !name || SERVERS[name]) return;
 
         SERVERS[name] = {
             owner: socket.data.username,
@@ -185,16 +185,16 @@ io.on("connection", socket => {
             bannedUsers: []
         };
         SERVERS[name].userRoles[socket.data.username] = "Admin";
-        
+
         USERS[socket.data.username].servers.push(name);
         saveDB();
         socket.emit("serverCreated", name);
     });
 
     socket.on("joinGuild", (name) => {
-        if(!socket.data.auth || !SERVERS[name]) return;
+        if (!socket.data.auth || !SERVERS[name]) return;
         const userSrvs = USERS[socket.data.username].servers;
-        if(!userSrvs.includes(name)) {
+        if (!userSrvs.includes(name)) {
             userSrvs.push(name);
             saveDB();
             socket.emit("serverJoined", name);
@@ -202,8 +202,8 @@ io.on("connection", socket => {
     });
 
     socket.on("selectServer", (serverName) => {
-        if(!socket.data.auth || !SERVERS[serverName]) return;
-        
+        if (!socket.data.auth || !SERVERS[serverName]) return;
+
         if (socket.data.currentServer && SERVERS[socket.data.currentServer]) {
             SERVERS[socket.data.currentServer].activeUsers.delete(socket.data.username);
             updateMemberList(socket.data.currentServer);
@@ -211,13 +211,13 @@ io.on("connection", socket => {
         }
 
         const srv = SERVERS[serverName];
-        socket.join(serverName); 
+        socket.join(serverName);
         socket.data.currentServer = serverName;
         srv.activeUsers.add(socket.data.username);
-        
+
         const userRole = srv.userRoles[socket.data.username] || "";
         const userPermissions = srv.rolePermissions[userRole] || [];
-        
+
         socket.emit("serverData", {
             name: serverName,
             channels: Object.keys(srv.channels),
@@ -234,10 +234,10 @@ io.on("connection", socket => {
     // --- ROL & KANAL İŞLEMLERİ ---
     socket.on("assignRole", ({ target, roleName }) => {
         const srv = SERVERS[socket.data.currentServer];
-        if(srv && srv.owner === socket.data.username) {
+        if (srv && srv.owner === socket.data.username) {
             if (roleName === null) delete srv.userRoles[target];
             else srv.userRoles[target] = roleName;
-            
+
             saveDB();
             updateMemberList(socket.data.currentServer);
         }
@@ -245,8 +245,8 @@ io.on("connection", socket => {
 
     socket.on("createChannel", (channelName) => {
         const srv = SERVERS[socket.data.currentServer];
-        if(srv && srv.owner === socket.data.username) {
-            if(!srv.channels[channelName]) {
+        if (srv && srv.owner === socket.data.username) {
+            if (!srv.channels[channelName]) {
                 srv.channels[channelName] = [];
                 saveDB();
                 io.to(socket.data.currentServer).emit("serverData", {
@@ -262,7 +262,7 @@ io.on("connection", socket => {
     socket.on("createRole", ({ name, color, permissions }) => {
         try {
             const srv = SERVERS[socket.data.currentServer];
-            if(srv && srv.owner === socket.data.username) {
+            if (srv && srv.owner === socket.data.username) {
                 srv.roles[name] = color;
                 if (!srv.rolePermissions) srv.rolePermissions = {};
                 srv.rolePermissions[name] = permissions || [];
@@ -280,11 +280,11 @@ io.on("connection", socket => {
             console.error(">> createRole Error:", err);
         }
     });
-    
+
     socket.on("updateRolePermissions", ({ roleName, permissions }) => {
         try {
             const srv = SERVERS[socket.data.currentServer];
-            if(srv && srv.owner === socket.data.username) {
+            if (srv && srv.owner === socket.data.username) {
                 if (!srv.rolePermissions) srv.rolePermissions = {};
                 srv.rolePermissions[roleName] = permissions || [];
                 saveDB();
@@ -300,16 +300,16 @@ io.on("connection", socket => {
             console.error(">> updateRolePermissions Error:", err);
         }
     });
-    
+
     socket.on("deleteChannel", (channelName) => {
         try {
             const srv = SERVERS[socket.data.currentServer];
             if (!srv || !srv.channels[channelName]) return;
-            
+
             const userRole = srv.userRoles[socket.data.username] || "";
             const userPermissions = srv.rolePermissions[userRole] || [];
             const isOwner = srv.owner === socket.data.username;
-            
+
             if (isOwner || userPermissions.includes("manage_channels")) {
                 delete srv.channels[channelName];
                 saveDB();
@@ -325,16 +325,16 @@ io.on("connection", socket => {
             console.error(">> deleteChannel Error:", err);
         }
     });
-    
+
     socket.on("banUser", ({ targetUsername }) => {
         try {
             const srv = SERVERS[socket.data.currentServer];
             if (!srv) return;
-            
+
             const userRole = srv.userRoles[socket.data.username] || "";
             const userPermissions = srv.rolePermissions[userRole] || [];
             const isOwner = srv.owner === socket.data.username;
-            
+
             if ((isOwner || userPermissions.includes("ban_users")) && targetUsername !== socket.data.username) {
                 if (!srv.bannedUsers) srv.bannedUsers = [];
                 if (!srv.bannedUsers.includes(targetUsername)) {
@@ -351,7 +351,7 @@ io.on("connection", socket => {
     // --- MESAJLAŞMA SİSTEMİ ---
     socket.on("selectChannel", (channelName) => {
         const srv = SERVERS[socket.data.currentServer];
-        if(srv && srv.channels[channelName]) {
+        if (srv && srv.channels[channelName]) {
             socket.data.currentChannel = channelName;
             socket.emit("loadMessages", srv.channels[channelName]);
         }
@@ -360,8 +360,8 @@ io.on("connection", socket => {
     socket.on("chat", (text) => {
         try {
             const srv = SERVERS[socket.data.currentServer];
-            if(!srv || !socket.data.currentChannel) return;
-            
+            if (!srv || !socket.data.currentChannel) return;
+
             // Ban kontrolü
             if (srv.bannedUsers && srv.bannedUsers.includes(socket.data.username)) {
                 return socket.emit("error", "Bu sunucudan yasaklandınız!");
@@ -402,7 +402,7 @@ io.on("connection", socket => {
             const userData = USERS[socket.data.username] || {};
             const isPulse = userData.pulse || false;
             const isPlus = userData.isPlus || false;
-            
+
             // Resim link kontrolü - Daha gelişmiş regex
             const imageRegex = /(https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp|svg|bmp|ico))(\?[^\s]*)?/gi;
             const hasImage = imageRegex.test(text);
@@ -413,10 +413,10 @@ io.on("connection", socket => {
                     imageUrl = match[0].trim();
                 }
             }
-            
-            const msgObj = { 
-                user: socket.data.username, 
-                text, 
+
+            const msgObj = {
+                user: socket.data.username,
+                text,
                 roleColor: srv.roles[role] || userData.themeColor || "#ddd",
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 pulse: isPulse,
@@ -424,13 +424,13 @@ io.on("connection", socket => {
                 avatar: userData.avatar || null,
                 imageUrl: imageUrl
             };
-            
+
             srv.channels[socket.data.currentChannel].push(msgObj);
             saveDB();
-            
-            io.to(socket.data.currentServer).emit("message", { 
-                ...msgObj, 
-                channel: socket.data.currentChannel 
+
+            io.to(socket.data.currentServer).emit("message", {
+                ...msgObj,
+                channel: socket.data.currentChannel
             });
         } catch (err) {
             console.error(">> chat Error:", err);
@@ -440,8 +440,8 @@ io.on("connection", socket => {
 
     // --- SOSYAL SİSTEM ---
     socket.on("sendFriendRequest", (target) => {
-        if(USERS[target] && target !== socket.data.username) {
-            if(!USERS[target].requests.includes(socket.data.username) && !USERS[target].friends.includes(socket.data.username)) {
+        if (USERS[target] && target !== socket.data.username) {
+            if (!USERS[target].requests.includes(socket.data.username) && !USERS[target].friends.includes(socket.data.username)) {
                 USERS[target].requests.push(socket.data.username);
                 saveDB();
                 io.emit("newFriendNotify", { to: target, from: socket.data.username });
@@ -451,10 +451,10 @@ io.on("connection", socket => {
 
     socket.on("acceptFriend", (from) => {
         const me = socket.data.username;
-        if(USERS[me] && USERS[me].requests.includes(from)) {
-            if(!USERS[me].friends) USERS[me].friends = [];
+        if (USERS[me] && USERS[me].requests.includes(from)) {
+            if (!USERS[me].friends) USERS[me].friends = [];
             USERS[me].friends.push(from);
-            if(!USERS[from].friends) USERS[from].friends = [];
+            if (!USERS[from].friends) USERS[from].friends = [];
             USERS[from].friends.push(me);
             USERS[me].requests = USERS[me].requests.filter(u => u !== from);
             saveDB();
@@ -484,7 +484,7 @@ io.on("connection", socket => {
             console.error(">> updateMemberList Error:", err);
         }
     }
-    
+
     // Pulse Sistemi
     socket.on("activatePulse", () => {
         try {
@@ -499,13 +499,13 @@ io.on("connection", socket => {
             console.error(">> activatePulse Error:", err);
         }
     });
-    
+
     socket.on("updateAvatar", (avatarUrl) => {
         try {
             if (!socket.data.auth) return;
             const userData = USERS[socket.data.username];
             if (!userData) return;
-            
+
             // Plus kullanıcıları GIF, normal kullanıcılar sadece statik
             if (userData.isPlus) {
                 userData.avatar = avatarUrl; // GIF desteklenir
@@ -526,14 +526,14 @@ io.on("connection", socket => {
             console.error(">> updateAvatar Error:", err);
         }
     });
-    
+
     // Profil Güncelleme
     socket.on("updateProfile", ({ bio, banner, themeColor }) => {
         try {
             if (!socket.data.auth) return;
             const userData = USERS[socket.data.username];
             if (!userData) return;
-            
+
             if (bio !== undefined) userData.bio = bio;
             if (banner !== undefined && userData.isPlus) {
                 userData.banner = banner; // Banner sadece Plus'a özel
@@ -541,14 +541,14 @@ io.on("connection", socket => {
                 return socket.emit("error", "Banner sadece Engine Plus üyelerine özeldir!");
             }
             if (themeColor !== undefined) userData.themeColor = themeColor;
-            
+
             saveDB();
             socket.emit("profileUpdated", { bio: userData.bio, banner: userData.banner, themeColor: userData.themeColor });
         } catch (err) {
             console.error(">> updateProfile Error:", err);
         }
     });
-    
+
     // Admin İşlemleri
     socket.on("adminGivePlus", ({ targetUsername }) => {
         try {
@@ -567,7 +567,7 @@ io.on("connection", socket => {
             console.error(">> adminGivePlus Error:", err);
         }
     });
-    
+
     socket.on("adminKickUser", ({ targetUsername, serverName }) => {
         try {
             if (!socket.data.auth || !socket.data.isAdmin) {
@@ -576,11 +576,11 @@ io.on("connection", socket => {
             if (!SERVERS[serverName]) {
                 return socket.emit("error", "Sunucu bulunamadı!");
             }
-            
+
             const srv = SERVERS[serverName];
             srv.activeUsers.delete(targetUsername);
             updateMemberList(serverName);
-            
+
             // Kullanıcıyı sunucudan çıkar
             const targetSocket = Array.from(io.sockets.sockets.values()).find(s => s.data.username === targetUsername);
             if (targetSocket && targetSocket.data.currentServer === serverName) {
@@ -588,13 +588,13 @@ io.on("connection", socket => {
                 targetSocket.data.currentServer = null;
                 targetSocket.emit("kickedFromServer", serverName);
             }
-            
+
             socket.emit("adminSuccess", `${targetUsername} kullanıcısı ${serverName} sunucusundan atıldı!`);
         } catch (err) {
             console.error(">> adminKickUser Error:", err);
         }
     });
-    
+
     socket.on("adminBanUser", ({ targetUsername }) => {
         try {
             if (!socket.data.auth || !socket.data.isAdmin) {
@@ -603,7 +603,7 @@ io.on("connection", socket => {
             if (!USERS[targetUsername]) {
                 return socket.emit("error", "Kullanıcı bulunamadı!");
             }
-            
+
             // Tüm sunuculardan banla
             Object.keys(SERVERS).forEach(sName => {
                 if (!SERVERS[sName].bannedUsers) SERVERS[sName].bannedUsers = [];
@@ -611,7 +611,7 @@ io.on("connection", socket => {
                     SERVERS[sName].bannedUsers.push(targetUsername);
                 }
             });
-            
+
             saveDB();
             socket.emit("adminSuccess", `${targetUsername} kullanıcısı tüm sunuculardan yasaklandı!`);
         } catch (err) {
@@ -624,7 +624,7 @@ io.on("connection", socket => {
         try {
             const command = text.split(" ")[0].toLowerCase();
             const userData = USERS[socket.data.username] || {};
-            
+
             if (command === "!zar") {
                 const roll = Math.floor(Math.random() * 6) + 1;
                 const botMsg = {
@@ -642,7 +642,7 @@ io.on("connection", socket => {
                 saveDB();
                 io.to(socket.data.currentServer).emit("message", { ...botMsg, channel: socket.data.currentChannel });
             }
-            
+
             else if (command === "!para") {
                 const result = Math.random() < 0.5 ? "Yazı" : "Tura";
                 const emoji = result === "Yazı" ? "🪙" : "🪙";
@@ -661,7 +661,7 @@ io.on("connection", socket => {
                 saveDB();
                 io.to(socket.data.currentServer).emit("message", { ...botMsg, channel: socket.data.currentChannel });
             }
-            
+
             else if (command === "!günlük") {
                 const today = new Date().toDateString();
                 if (userData.dailyClaimed === today) {
@@ -684,7 +684,7 @@ io.on("connection", socket => {
                     userData.credits = (userData.credits || 0) + credits;
                     userData.dailyClaimed = today;
                     saveDB();
-                    
+
                     const botMsg = {
                         user: "CosmicBot",
                         text: `💰 ${socket.data.username} günlük ödülünü aldı! **+${credits} Cosmic Kredi** (Toplam: ${userData.credits})`,
@@ -702,7 +702,7 @@ io.on("connection", socket => {
                     socket.emit("creditsUpdated", userData.credits);
                 }
             }
-            
+
             else if (command === "!profil") {
                 const joinDate = new Date(userData.joinDate || new Date()).toLocaleDateString('tr-TR');
                 const botMsg = {
@@ -725,7 +725,130 @@ io.on("connection", socket => {
         }
     }
 
+    // --- VOICE CHANNEL SYSTEM ---
+    socket.data.voiceChannel = null;
+
+    socket.on("joinVoice", ({ channel, server }) => {
+        try {
+            if (!socket.data.auth) return;
+
+            // Leave previous voice channel
+            if (socket.data.voiceChannel) {
+                io.to(socket.data.currentServer).emit("voiceUserLeft", {
+                    user: socket.data.username,
+                    channel: socket.data.voiceChannel
+                });
+            }
+
+            socket.data.voiceChannel = channel;
+
+            // Notify server about voice join
+            io.to(server).emit("voiceUserJoined", {
+                user: socket.data.username,
+                channel: channel
+            });
+
+            console.log(`🎧 ${socket.data.username} joined voice: ${channel} on ${server}`);
+        } catch (err) {
+            console.error(">> joinVoice Error:", err);
+        }
+    });
+
+    socket.on("leaveVoice", () => {
+        try {
+            if (!socket.data.auth || !socket.data.voiceChannel) return;
+
+            io.to(socket.data.currentServer).emit("voiceUserLeft", {
+                user: socket.data.username,
+                channel: socket.data.voiceChannel
+            });
+
+            console.log(`📴 ${socket.data.username} left voice: ${socket.data.voiceChannel}`);
+            socket.data.voiceChannel = null;
+        } catch (err) {
+            console.error(">> leaveVoice Error:", err);
+        }
+    });
+
+    // --- DM (DIRECT MESSAGE) SYSTEM ---
+    socket.on("sendDM", ({ to, text }) => {
+        try {
+            if (!socket.data.auth || !to || !text) return;
+
+            const from = socket.data.username;
+
+            // Check if they are friends
+            const userData = USERS[from];
+            if (!userData || !userData.friends || !userData.friends.includes(to)) {
+                return socket.emit("error", "Bu kullanıcıya DM gönderemezsiniz! Önce arkadaş olmalısınız.");
+            }
+
+            // Create DM key (alphabetically sorted for consistency)
+            const dmKey = [from, to].sort().join("-");
+
+            // Initialize DM storage if needed
+            if (!USERS._directMessages) USERS._directMessages = {};
+            if (!USERS._directMessages[dmKey]) USERS._directMessages[dmKey] = [];
+
+            const dmMsg = {
+                from: from,
+                to: to,
+                text: text,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                timestamp: Date.now()
+            };
+
+            USERS._directMessages[dmKey].push(dmMsg);
+
+            // Keep only last 100 messages per conversation
+            if (USERS._directMessages[dmKey].length > 100) {
+                USERS._directMessages[dmKey] = USERS._directMessages[dmKey].slice(-100);
+            }
+
+            saveDB();
+
+            // Send to recipient if online
+            const recipientSocket = Array.from(io.sockets.sockets.values()).find(s => s.data.username === to);
+            if (recipientSocket) {
+                recipientSocket.emit("dmReceived", dmMsg);
+            }
+
+            // Confirm to sender
+            socket.emit("dmSent", dmMsg);
+
+            console.log(`💬 DM: ${from} -> ${to}: ${text.substring(0, 30)}...`);
+        } catch (err) {
+            console.error(">> sendDM Error:", err);
+        }
+    });
+
+    socket.on("loadDMs", (targetUser) => {
+        try {
+            if (!socket.data.auth || !targetUser) return;
+
+            const from = socket.data.username;
+            const dmKey = [from, targetUser].sort().join("-");
+
+            const messages = (USERS._directMessages && USERS._directMessages[dmKey]) || [];
+
+            socket.emit("dmHistory", {
+                user: targetUser,
+                messages: messages
+            });
+        } catch (err) {
+            console.error(">> loadDMs Error:", err);
+        }
+    });
+
     socket.on("disconnect", () => {
+        // Leave voice if connected
+        if (socket.data.voiceChannel && socket.data.currentServer) {
+            io.to(socket.data.currentServer).emit("voiceUserLeft", {
+                user: socket.data.username,
+                channel: socket.data.voiceChannel
+            });
+        }
+
         if (socket.data.currentServer && SERVERS[socket.data.currentServer]) {
             SERVERS[socket.data.currentServer].activeUsers.delete(socket.data.username);
             updateMemberList(socket.data.currentServer);
